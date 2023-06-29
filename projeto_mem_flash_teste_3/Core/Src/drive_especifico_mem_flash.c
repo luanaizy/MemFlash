@@ -8,6 +8,7 @@
 
 #include "drive_mem_flash.h"
 #include "stm32f4xx_hal.h"
+#include "stdint.h"
 
 void hw_gpio_write_pin(void*gpio_port, uint16_t gpio_pin, uint32_t value){
 

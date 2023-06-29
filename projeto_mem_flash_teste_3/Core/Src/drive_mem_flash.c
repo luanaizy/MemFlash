@@ -7,6 +7,14 @@
 
 #include "drive_mem_flash.h"
 #include "stm32f4xx_hal.h"
+#include "stdint.h"
+
+typedef struct {
+    void *hspi;
+    void *gpio_port;
+    uint16_t gpio_pin;
+} mem_hw_t;
+
 
 /*defines-----------------------------------------------------------------------------------------*/
 
@@ -21,7 +29,8 @@
 
 
 
-void SectorErase(mem_hw_t *mem, uint32_t addr){
+void SectorErase(mem_hw_t *mem, uint32_t addr)
+{
 
 	uint8_t writeenable[1]={MEM_CMD_WRITE_ENABLE};
 	uint8_t readstatusregister1[1]={MEM_CMD_READ_STATUS_REGISTER1};
@@ -49,16 +58,19 @@ void SectorErase(mem_hw_t *mem, uint32_t addr){
 
 	 uint8_t busy_erase = *(buffer) & 0x01;
 
-	while (busy_erase == 1){
+	while (busy_erase == 1)
+	{
 		hw_gpio_write_pin(mem->gpio_port, mem->gpio_pin, 0);
 		hw_spi_transmit(mem->hspi, readstatusregister1, 1, SPI_TIMEOUT);
 		hw_spi_receive(mem->hspi, buffer, 1, SPI_TIMEOUT);
 		hw_gpio_write_pin(mem->gpio_port, mem->gpio_pin, 1);
 		busy_erase = *(buffer) & 0x01;
+	}
 }
 
 
-void PageProgram(mem_hw_t *mem, uint32_t addr, uint8_t *pdata ){
+void PageProgram(mem_hw_t *mem, uint32_t addr, uint8_t *pdata )
+{
 
 	uint8_t writeenable[]={MEM_CMD_WRITE_ENABLE};
 	uint8_t pageprogram[sizeof(pdata)+4];
@@ -67,7 +79,8 @@ void PageProgram(mem_hw_t *mem, uint32_t addr, uint8_t *pdata ){
 	pageprogram[2] = addr & 0X0000FF00;
 	pageprogram[3] = addr & 0X000000FF;
 
-	for (int i=0;i<sizeof(pdata);i++){
+	for (int i=0;i<sizeof(pdata);i++)
+	{
 		pageprogram[i+4] = pdata[i];
 	}
 
@@ -82,7 +95,8 @@ void PageProgram(mem_hw_t *mem, uint32_t addr, uint8_t *pdata ){
 
 
 
-uint8_t ReadData(mem_hw_t *mem, uint32_t addr, uint16_t size){
+uint8_t ReadData(mem_hw_t *mem, uint32_t addr, uint16_t size)
+{
 	uint8_t readdata[4];
 	readdata[0] = MEM_CMD_PAGE_PROGRAM;
 	readdata[1] = (addr & 0x00FF0000)>>4;
@@ -92,17 +106,18 @@ uint8_t ReadData(mem_hw_t *mem, uint32_t addr, uint16_t size){
 
 	hw_gpio_write_pin(mem->gpio_port, mem->gpio_pin, 0);
 	hw_spi_transmit(mem->hspi, readdata, 4, SPI_TIMEOUT);
-	hw_spi_receive(mem->hspi, received, sizeof(pageprogram), SPI_TIMEOUT);
+	hw_spi_receive(mem->hspi, received, sizeof(received), SPI_TIMEOUT);
 	hw_gpio_write_pin(mem->gpio_port, mem->gpio_pin, 1);
 
 	return received;
 }
 
-uint8_t JedecId(mem_hw_t *mem){
+uint8_t JedecId(mem_hw_t *mem)
+{
 	uint8_t jedecid[1]={MEM_CMD_JEDEC_ID};
 	uint8_t received[3];
 	hw_gpio_write_pin(mem->gpio_port, mem->gpio_pin, 0);
-	hw_spi_transmit(mem->hspi, readdata, 4, SPI_TIMEOUT);
+	hw_spi_transmit(mem->hspi, jedecid,1, SPI_TIMEOUT);
 	hw_spi_receive(mem->hspi, received, 3, SPI_TIMEOUT);
 	hw_gpio_write_pin(mem->gpio_port, mem->gpio_pin, 1);
 

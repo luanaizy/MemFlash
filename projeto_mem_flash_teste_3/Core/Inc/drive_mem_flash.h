@@ -4,11 +4,20 @@
  *  Created on: 28 de jun de 2023
  *      Author: luana
  */
+#include "stdint.h"
+
+typedef struct {
+    void *hspi;
+    void *gpio_port;
+    uint16_t gpio_pin;
+} mem_hw_t;
+
 
 #ifndef INC_DRIVE_MEM_FLASH_H_
 #define INC_DRIVE_MEM_FLASH_H_
 
-typedef struct{
+typedef struct
+{
 	void *hspi;
 	void *gpio_port;
 	uint16_t gpio_pin;
