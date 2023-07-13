@@ -1,0 +1,4 @@
+drive_mem_flash.c:26:6:SectorErase	2
+drive_mem_flash.c:66:6:PageProgram	1
+drive_mem_flash.c:88:6:ReadData	1
+drive_mem_flash.c:103:10:JedecId	1

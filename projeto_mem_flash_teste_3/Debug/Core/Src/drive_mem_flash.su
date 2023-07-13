@@ -1,0 +1,4 @@
+../Core/Src/drive_mem_flash.c:26:6:SectorErase	32	static
+../Core/Src/drive_mem_flash.c:66:6:PageProgram	32	static
+../Core/Src/drive_mem_flash.c:88:6:ReadData	32	static
+../Core/Src/drive_mem_flash.c:103:10:JedecId	32	static

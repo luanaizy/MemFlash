@@ -6,13 +6,6 @@
  */
 #include "stdint.h"
 
-typedef struct {
-    void *hspi;
-    void *gpio_port;
-    uint16_t gpio_pin;
-} mem_hw_t;
-
-
 #ifndef INC_DRIVE_MEM_FLASH_H_
 #define INC_DRIVE_MEM_FLASH_H_
 
@@ -36,11 +29,11 @@ status_hw hw_spi_receive(void*hspi, uint8_t *pdata, uint16_t size, uint32_t time
 
 void SectorErase(mem_hw_t *mem, uint32_t addr);
 
-void PageProgram(mem_hw_t *mem, uint32_t addr, uint8_t *pdata );
+void PageProgram(mem_hw_t *mem, uint32_t addr, uint8_t *pdata, uint16_t bytes_lenght );
 
-uint8_t ReadData(mem_hw_t *mem, uint32_t addr, uint16_t size);
+void ReadData(mem_hw_t *mem, uint32_t addr, uint8_t *received, uint16_t size);
 
-uint8_t JedecId(mem_hw_t *mem);
+uint32_t JedecId(mem_hw_t *mem);
 
 
 #endif /* INC_DRIVE_MEM_FLASH_H_ */

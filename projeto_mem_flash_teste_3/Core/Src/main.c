@@ -22,7 +22,7 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include "drive_mem_flash.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -90,14 +90,16 @@ int main(void)
   MX_GPIO_Init();
   MX_SPI1_Init();
   /* USER CODE BEGIN 2 */
-  uint8_t writeenable[1]={0x06};
-  uint8_t sectorerase[4] = {0x20,0x0,0x0,0x05}; // comando + 3 bytes de endereço
-  uint8_t pageprogram[6]={0x02,0x0,0x0,0x05,0xAA,0xBB}; //comando + 3 bytes de endereço + 2 bits de dados
-  uint8_t readdata[4] = {0x03,0x0,0x0,0x5}; // comando + 3 bytes de endereço
-  uint8_t jedecid[1] = {0X9f};
-  uint8_t valorum[1] = {0x01};
-  uint8_t readstatusregister1[1] = {0x05};
-  uint8_t received[3];
+
+  uint8_t received[5];
+  uint32_t jedecid;
+  uint8_t dados[5] = {0x01,0x02,0x03,0x04,0x05};
+
+  mem_hw_t mem = {
+  		.hspi = &hspi1,
+  		.gpio_port = GPIOA,
+  		.gpio_pin = GPIO_PIN_4
+  };
 
   /* USER CODE END 2 */
 
@@ -106,48 +108,10 @@ int main(void)
   while (1)
   {
 
-
-
-	 HAL_GPIO_WritePin(GPIOA, GPIO_PIN_4, 0);
-	 HAL_SPI_Transmit(&hspi1, writeenable, 1, HAL_MAX_DELAY); //WRITE ENABLE
-	 HAL_GPIO_WritePin(GPIOA, GPIO_PIN_4, 1);
-
-	 HAL_GPIO_WritePin(GPIOA, GPIO_PIN_4, 0);
-	 HAL_SPI_Transmit(&hspi1, sectorerase, 4, HAL_MAX_DELAY); //SECTOR ERASE endereço 5
-	 HAL_GPIO_WritePin(GPIOA, GPIO_PIN_4, 1);
-
-	 HAL_GPIO_WritePin(GPIOA, GPIO_PIN_4, 0);
-	 HAL_SPI_Transmit(&hspi1, readstatusregister1, 1, HAL_MAX_DELAY);
-	 HAL_SPI_Receive(&hspi1, received,1,HAL_MAX_DELAY);
-	 HAL_GPIO_WritePin(GPIOA, GPIO_PIN_4, 1);
-	 uint8_t busy_erase = *(received) & 0x01;
-
-	while (busy_erase == 1){
-		HAL_GPIO_WritePin(GPIOA, GPIO_PIN_4, 0);
-		HAL_SPI_Transmit(&hspi1, readstatusregister1, 1, HAL_MAX_DELAY);
-		HAL_SPI_Receive(&hspi1, received,1,HAL_MAX_DELAY);
-		HAL_GPIO_WritePin(GPIOA, GPIO_PIN_4, 1);
-		busy_erase = *(received) & 0x01;
-	}
-
-	 HAL_GPIO_WritePin(GPIOA, GPIO_PIN_4, 0);
-	 HAL_SPI_Transmit(&hspi1, writeenable, 1, HAL_MAX_DELAY); //WRITE ENABLE
-	 HAL_GPIO_WritePin(GPIOA, GPIO_PIN_4, 1);
-
-	 HAL_GPIO_WritePin(GPIOA, GPIO_PIN_4, 0);
-	 HAL_SPI_Transmit(&hspi1, pageprogram, sizeof(pageprogram), HAL_MAX_DELAY); //PAGE PROGRAM endereço 5 = AA BB
-	 HAL_GPIO_WritePin(GPIOA, GPIO_PIN_4, 1);
-
-	 HAL_GPIO_WritePin(GPIOA, GPIO_PIN_4, 0);
-	 HAL_SPI_Transmit(&hspi1, readdata, sizeof(readdata), HAL_MAX_DELAY); //READ DATA endereço 5
-
-	 HAL_SPI_Receive(&hspi1, received, 3, HAL_MAX_DELAY);
-
-
-	 HAL_GPIO_WritePin(GPIOA, GPIO_PIN_4, 1);
-
-
-
+	  jedecid = JedecId(&mem);
+	  SectorErase(&mem,0);
+	  PageProgram(&mem, 0,dados,5);
+	  ReadData(&mem,0,received,5);
 
     /* USER CODE END WHILE */
 

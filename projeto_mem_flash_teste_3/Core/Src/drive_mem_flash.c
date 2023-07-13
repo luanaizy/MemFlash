@@ -9,12 +9,6 @@
 #include "stm32f4xx_hal.h"
 #include "stdint.h"
 
-typedef struct {
-    void *hspi;
-    void *gpio_port;
-    uint16_t gpio_pin;
-} mem_hw_t;
-
 
 /*defines-----------------------------------------------------------------------------------------*/
 
@@ -27,7 +21,7 @@ typedef struct {
 
 #define SPI_TIMEOUT                  (1000)/* @brief Timeout das funções de leitura e escrita SPI em ms*/
 
-
+#define GET_BYTE(addr, num_byte) (addr & (0x000000FF << 8*num_byte))
 
 void SectorErase(mem_hw_t *mem, uint32_t addr)
 {
@@ -36,17 +30,17 @@ void SectorErase(mem_hw_t *mem, uint32_t addr)
 	uint8_t readstatusregister1[1]={MEM_CMD_READ_STATUS_REGISTER1};
 	uint8_t sectorerase[4];
 	sectorerase[0] = MEM_CMD_SECTOR_ERASE;
-	sectorerase[1] = addr & 0x00FF0000;
-	sectorerase[2] = addr & 0X0000FF00;
-	sectorerase[3] = addr & 0X000000FF;
+	sectorerase[1] = GET_BYTE(addr, 3 - 1);
+	sectorerase[2] = GET_BYTE(addr, 3 - 2);
+	sectorerase[3] = GET_BYTE(addr, 3 - 3);
 	uint8_t buffer[1];
 
 	 hw_gpio_write_pin(mem->gpio_port, mem->gpio_pin, 0);
-	 hw_spi_transmit(mem->hspi, writeenable, 1, SPI_TIMEOUT); //WRITE ENABLE
+	 hw_spi_transmit(mem->hspi, writeenable, 1, SPI_TIMEOUT);
 	 hw_gpio_write_pin(mem->gpio_port, mem->gpio_pin, 1);
 
 	 hw_gpio_write_pin(mem->gpio_port, mem->gpio_pin, 0);
-	 hw_spi_transmit(mem->hspi, sectorerase, 4, SPI_TIMEOUT); //SECTOR ERASE endereço 5
+	 hw_spi_transmit(mem->hspi, sectorerase, 4, SPI_TIMEOUT);
 	 hw_gpio_write_pin(mem->gpio_port, mem->gpio_pin, 1);
 
 
@@ -69,57 +63,54 @@ void SectorErase(mem_hw_t *mem, uint32_t addr)
 }
 
 
-void PageProgram(mem_hw_t *mem, uint32_t addr, uint8_t *pdata )
+void PageProgram(mem_hw_t *mem, uint32_t addr, uint8_t *pdata,  uint16_t bytes_length )
 {
 
 	uint8_t writeenable[]={MEM_CMD_WRITE_ENABLE};
-	uint8_t pageprogram[sizeof(pdata)+4];
+	uint8_t pageprogram[4];
 	pageprogram[0] = MEM_CMD_PAGE_PROGRAM;
-	pageprogram[1] = addr & 0x00FF0000;
-	pageprogram[2] = addr & 0X0000FF00;
-	pageprogram[3] = addr & 0X000000FF;
-
-	for (int i=0;i<sizeof(pdata);i++)
-	{
-		pageprogram[i+4] = pdata[i];
-	}
+	pageprogram[1] = GET_BYTE(addr, 3-1);
+	pageprogram[2] = GET_BYTE(addr, 3-2);
+	pageprogram[3] = GET_BYTE(addr, 3-3);
 
 	hw_gpio_write_pin(mem->gpio_port, mem->gpio_pin, 0);
 	hw_spi_transmit(mem->hspi, writeenable, 1, SPI_TIMEOUT); //WRITE ENABLE
-	 hw_gpio_write_pin(mem->gpio_port, mem->gpio_pin, 1);
+	hw_gpio_write_pin(mem->gpio_port, mem->gpio_pin, 1);
 
-	 hw_gpio_write_pin(mem->gpio_port, mem->gpio_pin, 0);
-	 hw_spi_transmit(mem->hspi, pageprogram, sizeof(pageprogram), SPI_TIMEOUT); //PAGE PROGRAM endereço 5 = AA BB
-	 hw_gpio_write_pin(mem->gpio_port, mem->gpio_pin, 1);
+	hw_gpio_write_pin(mem->gpio_port, mem->gpio_pin, 0);
+	hw_spi_transmit(mem->hspi, pageprogram, sizeof(pageprogram), SPI_TIMEOUT); //PAGE PROGRAM endereço 5 = AA BB
+	hw_spi_transmit(mem->hspi, pdata, bytes_length , SPI_TIMEOUT);
+	hw_gpio_write_pin(mem->gpio_port, mem->gpio_pin, 1);
 }
 
 
 
-uint8_t ReadData(mem_hw_t *mem, uint32_t addr, uint16_t size)
+void ReadData(mem_hw_t *mem, uint32_t addr, uint8_t *received ,uint16_t size)
 {
 	uint8_t readdata[4];
 	readdata[0] = MEM_CMD_PAGE_PROGRAM;
-	readdata[1] = (addr & 0x00FF0000)>>4;
-	readdata[2] = (addr & 0X0000FF00)>>2;
-	readdata[3] = addr & 0X000000FF;
-	uint8_t received[size];
+	readdata[1] = (GET_BYTE(addr,3-1))>>16;
+	readdata[2] = (GET_BYTE(addr,3-2))>>8;
+	readdata[3] = (GET_BYTE(addr,3-3));
 
 	hw_gpio_write_pin(mem->gpio_port, mem->gpio_pin, 0);
 	hw_spi_transmit(mem->hspi, readdata, 4, SPI_TIMEOUT);
-	hw_spi_receive(mem->hspi, received, sizeof(received), SPI_TIMEOUT);
+	hw_spi_receive(mem->hspi, received, size, SPI_TIMEOUT);
 	hw_gpio_write_pin(mem->gpio_port, mem->gpio_pin, 1);
 
-	return received;
 }
 
-uint8_t JedecId(mem_hw_t *mem)
+uint32_t JedecId(mem_hw_t *mem)
 {
 	uint8_t jedecid[1]={MEM_CMD_JEDEC_ID};
 	uint8_t received[3];
+	uint32_t data;
 	hw_gpio_write_pin(mem->gpio_port, mem->gpio_pin, 0);
 	hw_spi_transmit(mem->hspi, jedecid,1, SPI_TIMEOUT);
 	hw_spi_receive(mem->hspi, received, 3, SPI_TIMEOUT);
 	hw_gpio_write_pin(mem->gpio_port, mem->gpio_pin, 1);
 
-	return received;
+	data = received[0] & (received[1]<<8) & (received[2]<<16);
+
+	return data;
 }
