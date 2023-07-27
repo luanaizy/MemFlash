@@ -112,7 +112,6 @@ int main(void)
   /* USER CODE BEGIN WHILE */
 
 
-#define GET_BYTE(addr, num_byte) (addr & (0x000000FF << (8*num_byte)))
   while (1)
   {
 
