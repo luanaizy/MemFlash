@@ -1,4 +1,3 @@
 # MemFlash
 
 
-Linda, mulher, empodeirada
