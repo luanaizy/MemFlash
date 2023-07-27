@@ -1,5 +1,6 @@
-"./Core/Src/drive_especifico_mem_flash.o"
 "./Core/Src/drive_mem_flash.o"
+"./Core/Src/hw_gpio.o"
+"./Core/Src/hw_spi.o"
 "./Core/Src/main.o"
 "./Core/Src/stm32f4xx_hal_msp.o"
 "./Core/Src/stm32f4xx_it.o"

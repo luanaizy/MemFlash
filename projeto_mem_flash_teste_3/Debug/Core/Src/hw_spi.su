@@ -1,0 +1,2 @@
+../Core/Src/hw_spi.c:12:11:hw_spi_receive	32	static
+../Core/Src/hw_spi.c:22:11:hw_spi_transmit	32	static

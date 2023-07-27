@@ -1,3 +1,0 @@
-drive_especifico_mem_flash.c:13:6:hw_gpio_write_pin	1
-drive_especifico_mem_flash.c:18:11:hw_spi_receive	2
-drive_especifico_mem_flash.c:27:11:hw_spi_transmit	2

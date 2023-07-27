@@ -1,5 +1,4 @@
-Core/Src/drive_mem_flash.o: ../Core/Src/drive_mem_flash.c \
- ../Core/Inc/drive_mem_flash.h ../Core/Inc/hw_spi.h \
+Core/Src/hw_gpio.o: ../Core/Src/hw_gpio.c ../Core/Inc/hw_gpio.h \
  ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal.h \
  ../Core/Inc/stm32f4xx_hal_conf.h \
  ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_rcc.h \
@@ -26,9 +25,8 @@ Core/Src/drive_mem_flash.o: ../Core/Src/drive_mem_flash.c \
  ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_pwr.h \
  ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_pwr_ex.h \
  ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_spi.h \
- ../Core/Inc/hw_errorcode.h ../Core/Inc/hw_gpio.h
-../Core/Inc/drive_mem_flash.h:
-../Core/Inc/hw_spi.h:
+ ../Core/Inc/hw_errorcode.h
+../Core/Inc/hw_gpio.h:
 ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal.h:
 ../Core/Inc/stm32f4xx_hal_conf.h:
 ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_rcc.h:
@@ -56,4 +54,3 @@ Core/Src/drive_mem_flash.o: ../Core/Src/drive_mem_flash.c \
 ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_pwr_ex.h:
 ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_spi.h:
 ../Core/Inc/hw_errorcode.h:
-../Core/Inc/hw_gpio.h:

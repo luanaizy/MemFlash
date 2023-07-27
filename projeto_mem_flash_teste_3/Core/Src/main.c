@@ -17,12 +17,14 @@
   */
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
+
 #include "main.h"
 #include "stdint.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "drive_mem_flash.h"
+
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -89,11 +91,14 @@ int main(void)
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
   MX_SPI1_Init();
+
   /* USER CODE BEGIN 2 */
 
-  uint8_t received[5];
-  uint32_t jedecid;
-  uint8_t dados[5] = {0x01,0x02,0x03,0x04,0x05};
+  uint8_t receivedsetor0[5];
+  uint8_t receivedsetor1[5];
+
+  uint8_t dados1[1] = {0XAB};
+  uint8_t dados2[1] = {0XCD};
 
   mem_hw_t mem = {
   		.hspi = &hspi1,
@@ -105,13 +110,27 @@ int main(void)
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
+
+
+#define GET_BYTE(addr, num_byte) (addr & (0x000000FF << (8*num_byte)))
   while (1)
   {
 
-	  jedecid = JedecId(&mem);
-	  SectorErase(&mem,0);
-	  PageProgram(&mem, 0,dados,5);
-	  ReadData(&mem,0,received,5);
+	  sectorErase(&mem, 0);
+	  sectorErase(&mem,1);
+	  sectorErase(&mem, 0x1000);
+
+	  pageProgram(&mem, 0, dados1, 1);//AB na primeira palavra do setor 0
+	  pageProgram(&mem, 0x1000, dados2, 1);//CD na primeira palavra do setor 1
+
+	  readData(&mem,0,receivedsetor0,5); //verificando
+	  readData(&mem,0x1000,receivedsetor1,5);
+
+	  sectorErase(&mem, 1); // apagando o setor do endereço de memoria 1
+
+	  readData(&mem,0,receivedsetor0,5);
+	  readData(&mem,0x1000,receivedsetor1,5);
+
 
     /* USER CODE END WHILE */
 
